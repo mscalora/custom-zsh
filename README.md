@@ -5,7 +5,7 @@
     rm -rd ~/.oh-my-zsh/custom
     git clone https://github.com/mscalora/custom-zsh.git ~/.oh-my-zsh/custom
 
-### To use the theme, change you ZSH_THEME
+### To use the theme, in your .zshrc change youy ZSH_THEME and then rerun 
 
     ZSH_THEME="scalora"
 
