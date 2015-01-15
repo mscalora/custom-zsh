@@ -2,8 +2,7 @@
 
 ###Run these commands (after Oh My Zsh is installed)
 
-    rm -rd ~/.oh-my-zsh/custom
-    git clone https://github.com/mscalora/custom-zsh.git ~/.oh-my-zsh/custom
+   git clone https://github.com/mscalora/custom-zsh.git ~/.oh-my-zsh/custom
 
 ### To use the theme, in your .zshrc change youy ZSH_THEME and then rerun 
 
@@ -24,3 +23,7 @@
 ### and set the ZSH_THEME variable to whatever name you gave it
 
     ZSH_THEME="yadayada"
+
+# If you get an error updating oh-my-zsh, try this command once, then you should be able to update normally
+
+    cd ~/.oh-my-zsh ; git checkout custom ; upgrade_oh_my_zsh
