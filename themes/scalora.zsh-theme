@@ -95,23 +95,23 @@ function steeef_precmd {
 }
 add-zsh-hook precmd steeef_precmd
 
-host_color=$orange
+host_color=$orange$ZLOCALCOLOR
 hspc=""
 
 if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-  host_color=$bg[green]$fg[black]
+  host_color=$bg[green]$fg[black]$ZREMOTECOLOR
   host_space=" "
 # many other tests omitted
 else
   case $(ps -o comm= -p $PPID) in
     sshd|*/sshd) 
-      host_color=$bg[green]$fg[black]
+      host_color=$bg[green]$fg[black]$ZREMOTECOLOR
       host_space=" "
     ;;
   esac
 fi
 
-if [[ $PROMPT_SYS_NAME = "" ]] ; then
+if [[ "$PROMPT_SYS_NAME$ZSYSNAME" = "" ]] ; then
 
 PROMPT=$'
 %{$purple%}%n%{$reset_color%} at %{$host_color%}%{$host_space%}%m%{$host_space%}%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
@@ -120,7 +120,7 @@ $ '
 else
 
 PROMPT=$'
-%{$purple%}%n%{$reset_color%} at %{$host_color%}%{$host_space%]$PROMPT_SYS_NAME%{$host_space%}%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
+%{$purple%}%n%{$reset_color%} at %{$host_color%}%{$host_space%]$PROMPT_SYS_NAME$ZSYSNAME%{$host_space%}%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
 $ '
 
 fi
