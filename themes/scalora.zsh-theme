@@ -114,13 +114,13 @@ fi
 if [[ "$PROMPT_SYS_NAME$ZSYSNAME" = "" ]] ; then
 
 PROMPT=$'
-%{$purple%}%n%{$reset_color%} at %{$host_color%}%{$host_space%}%m%{$host_space%}%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
+%{$purple%}%n%{$reset_color%} on %{$host_color%}%{$host_space%}%m%{$host_space%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
 $ '
 
 else
 
 PROMPT=$'
-%{$purple%}%n%{$reset_color%} at %{$host_color%}%{$host_space%]$PROMPT_SYS_NAME$ZSYSNAME%{$host_space%}%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
+%{$purple%}%n%{$reset_color%} on %{$host_color%}%{$host_space%]$PROMPT_SYS_NAME$ZSYSNAME%{$host_space%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
 $ '
 
 fi
