@@ -8,6 +8,7 @@
 # http://briancarper.net/blog/570/git-info-in-your-zsh-prompt
 
 alias hist='history | egrep '
+alias upgrade_custom='$ZSH_CUSTOM/tools/upgrade.sh'
 
 function virtualenv_info {
     [ $VIRTUAL_ENV ] && echo '('$fg[blue]`basename $VIRTUAL_ENV`%{$reset_color%}') '
