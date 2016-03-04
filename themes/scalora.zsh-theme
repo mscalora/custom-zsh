@@ -94,9 +94,11 @@ function z_custom_precmd {
 add-zsh-hook precmd z_custom_precmd
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-# colors
+# virtual environment info
 
-host_color=${ZLOCALCOLOR:-$orange}
+function virtualenv_info {
+    [ $VIRTUAL_ENV ] && echo '('$fg[blue]`basename $VIRTUAL_ENV`%{$reset_color%}') '
+}
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # detect remote connections
@@ -112,8 +114,14 @@ else
     ;;
   esac
 fi
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# host colors
+
+local_color=${ZLOCALCOLOR:-$orange}
+remote_color=${ZREMOTECOLOR:-$bg[green]$fg[black]}
 [[ $remote = 1 ]] && PAD=" " || PAD=""
-[[ $remote = 1 ]] && ZHOST_COLOR="$bg[green]$fg[black]$ZREMOTECOLOR" || ZHOST_COLOR="$host_color"
+[[ $remote = 1 ]] && ZHOST_COLOR="$remote_color" || ZHOST_COLOR="$local_color"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # override system names
@@ -122,12 +130,23 @@ OVERRIDE_SYSNAME=${PROMPT_SYS_NAME:-$ZSYSNAME}
 ZSYSNAME=${OVERRIDE_SYSNAME:-$(echo $(hostname) | cut -d "." -f1)}
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-# zzzzzzzzzzzz
+# final prompt
 
 PROMPT=$'
 %{$purple%}%n%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
 $ '
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# final return status prompt
 
+# R=$fg[red]
+# G=$fg[green]
+# M=$fg[magenta]
+# RB=$fg_bold[red]
+# YB=$fg_bold[yellow]
+# BB=$fg_bold[blue]
+# RESET=$reset_color
+
+export RPS1="%(?..%{$fg_bold[yellow]%}%? ↵%{$reset_color%})"
 
 
