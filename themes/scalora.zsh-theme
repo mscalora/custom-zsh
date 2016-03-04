@@ -1,26 +1,27 @@
-# prompt style and colors based on Steve Losh's Prose theme:
-# http://github.com/sjl/oh-my-zsh/blob/master/themes/prose.zsh-theme
-#
-# vcs_info modifications from Bart Trojanowski's zsh prompt:
-# http://www.jukie.net/bart/blog/pimping-out-zsh-prompt
-#
-# git untracked files modification from Brian Carper:
-# http://briancarper.net/blog/570/git-info-in-your-zsh-prompt
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# theme autoloads
+
+autoload colors
+autoload -U add-zsh-hook
+autoload -Uz vcs_info
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# theme options
+
+PR_GIT_UPDATE=1
+setopt prompt_subst
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# theme aliases
 
 alias hist='history | egrep '
 alias upgrade_custom='source $ZSH_CUSTOM/tools/upgrade.sh'
 
-function virtualenv_info {
-    [ $VIRTUAL_ENV ] && echo '('$fg[blue]`basename $VIRTUAL_ENV`%{$reset_color%}') '
-}
-PR_GIT_UPDATE=1
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# theme color vars
 
-setopt prompt_subst
-autoload colors
 colors
-
-autoload -U add-zsh-hook
-autoload -Uz vcs_info
 
 #use extended color pallete if available
 if [[ $TERM = *256color* || $TERM = *rxvt* ]]; then
@@ -37,20 +38,12 @@ else
     limegreen="$fg[green]"
 fi
 
-# enable VCS systems you use
-zstyle ':vcs_info:*' enable git svn
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# zzzzzzzzzzzz
 
-# check-for-changes can be really slow.
-# you should disable it, if you work with large repositories
+zstyle ':vcs_info:*' enable git svn
 zstyle ':vcs_info:*:prompt:*' check-for-changes true
 
-# set formats
-# %b - branchname
-# %u - unstagedstr (see below)
-# %c - stagedstr (see below)
-# %a - action (e.g. rebase-i)
-# %R - repository path
-# %S - path in the repository
 PR_RST="%{${reset_color}%}"
 FMT_BRANCH="(%{$turquoise%}%b%u%c${PR_RST})"
 FMT_ACTION="(%{$limegreen%}%a${PR_RST})"
@@ -63,8 +56,10 @@ zstyle ':vcs_info:*:prompt:*' actionformats "${FMT_BRANCH}${FMT_ACTION}"
 zstyle ':vcs_info:*:prompt:*' formats       "${FMT_BRANCH}"
 zstyle ':vcs_info:*:prompt:*' nvcsformats   ""
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# custom hooks
 
-function steeef_preexec {
+function z_custom_preexec {
     case "$(history $HISTCMD)" in
         *git*)
             PR_GIT_UPDATE=1
@@ -74,14 +69,14 @@ function steeef_preexec {
             ;;
     esac
 }
-add-zsh-hook preexec steeef_preexec
+add-zsh-hook preexec z_custom_preexec
 
-function steeef_chpwd {
+function z_custom_chpwd {
     PR_GIT_UPDATE=1
 }
-add-zsh-hook chpwd steeef_chpwd
+add-zsh-hook chpwd z_custom_chpwd
 
-function steeef_precmd {
+function z_custom_precmd {
     if [[ -n "$PR_GIT_UPDATE" ]] ; then
         # check for untracked files or updated submodules, since vcs_info doesn't
         if git ls-files --other --exclude-standard 2> /dev/null | grep -q "."; then
@@ -96,45 +91,43 @@ function steeef_precmd {
         PR_GIT_UPDATE=
     fi
 }
-add-zsh-hook precmd steeef_precmd
+add-zsh-hook precmd z_custom_precmd
 
-host_color=$orange$ZLOCALCOLOR
-hspc=""
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# colors
 
+host_color=${ZLOCALCOLOR:-$orange}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# detect remote connections
+
+# detect if this is a remote connection
+remote=0
 if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-  host_color=$bg[green]$fg[black]$ZREMOTECOLOR
-  host_space=" "
-# many other tests omitted
+  remote=1
 else
   case $(ps -o comm= -p $PPID) in
     sshd|*/sshd) 
-      host_color=$bg[green]$fg[black]$ZREMOTECOLOR
-      host_space=" "
+      remote=1
     ;;
   esac
 fi
+[[ $remote = 1 ]] && PAD=" " || PAD=""
+[[ $remote = 1 ]] && ZHOST_COLOR="$bg[green]$fg[black]$ZREMOTECOLOR" || ZHOST_COLOR="$host_color"
 
-if [[ "$PROMPT_SYS_NAME$ZSYSNAME" = "" ]] ; then
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# override system names
+
+OVERRIDE_SYSNAME=${PROMPT_SYS_NAME:-$ZSYSNAME}
+ZSYSNAME=${OVERRIDE_SYSNAME:-$(echo $(hostname) | cut -d "." -f1)}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# zzzzzzzzzzzz
 
 PROMPT=$'
-%{$purple%}%n%{$reset_color%} on %{$host_color%}%{$host_space%}%m%{$host_space%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
+%{$purple%}%n%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
 $ '
 
-else
 
-PROMPT=$'
-%{$purple%}%n%{$reset_color%} on %{$host_color%}%{$host_space%}$PROMPT_SYS_NAME$ZSYSNAME%{$host_space%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
-$ '
 
-fi
 
-R=$fg[red]
-G=$fg[green]
-M=$fg[magenta]
-RB=$fg_bold[red]
-YB=$fg_bold[yellow]
-BB=$fg_bold[blue]
-RESET=$reset_color
-
-export return_code_prompt="%(?..%{$YB%}%? ↵%{$RESET%})"
-export RPS1="${return_code_prompt}"
