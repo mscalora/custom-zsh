@@ -19,6 +19,35 @@ alias hist='history | egrep '
 alias upgrade_custom='source $ZSH_CUSTOM/tools/upgrade.sh'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# self-update
+
+ts_file=~/.zsh-custom-update
+
+upgrade_custom_update() {
+    echo -n "$1" >! $ts_file
+}
+
+upgrade_custom_check() {
+  if [[ "$OSTYPE" == darwin* ]]; then
+	mac=1
+	ts=$(stat -f '%Sm' $ZSH/.git/FETCH_HEAD || echo 'missing' )
+  else
+	mac=0
+	ts=$(stat -c %y $ZSH/.git/FETCH_HEAD || echo 'missing' )
+  fi
+
+  prev=$( cat $ts_file || echo 'missing' )
+  if [[ "$ts" == $( cat $ts_file || echo 'missing' ) ]] ; then
+    #echo 'up to date'
+  else
+    upgrade_custom_update "$ts"
+    upgrade_custom    
+  fi
+}
+
+upgrade_custom_check
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # theme color vars
 
 colors
@@ -39,7 +68,7 @@ else
 fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-# zzzzzzzzzzzz
+# style section
 
 zstyle ':vcs_info:*' enable git svn
 zstyle ':vcs_info:*:prompt:*' check-for-changes true
