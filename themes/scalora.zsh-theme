@@ -5,7 +5,6 @@ autoload colors
 autoload -U add-zsh-hook
 autoload -Uz vcs_info
 
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # theme options
 
@@ -16,24 +15,38 @@ setopt prompt_subst
 # theme aliases
 
 alias hist='history | egrep '
-alias upgrade_custom='source $ZSH_CUSTOM/tools/upgrade.sh'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # self-update
 
 ts_file=~/.zsh-custom-update
 
+upgrade_custom() {
+  printf '\033[0;34m%s\033[0m\n' "Upgrading the custom files"
+  cd "$ZSH_CUSTOM"
+  if git pull --rebase --stat origin master
+  then
+    printf '\033[0;32m%s\033[0m\n' '                _                  '
+    printf '\033[0;32m%s\033[0m\n' '  ___  ___ __ _| | ___  _ __ __ _  '
+    printf '\033[0;32m%s\033[0m\n' ' / __|/ __/ _` | |/ _ \| |__/ _` | '
+    printf '\033[0;32m%s\033[0m\n' ' \__ \ ❨_| ❨_| | | ❨_❩ | | | ❨_| | '
+    printf '\033[0;32m%s\033[0m\n' ' |___/\___\__,_|_|\___/|_|  \__,_| '
+    printf '\033[0;32m%s\033[0m\n' '                                   '
+    printf '\033[0;34m%s\033[0m\n' 'Hooray! The custom files have been updated and/or are at the current version.'
+  else
+    printf '\033[0;31m%s\033[0m\n' 'There was an error updating. Try again later? You can trigger an update with: upgrade_custom'
+  fi
+}
+
 upgrade_custom_update() {
-    echo -n "$1" >! $ts_file
+  echo -n "$1" >! $ts_file
 }
 
 upgrade_custom_check() {
   if [[ "$OSTYPE" == darwin* ]]; then
-	mac=1
-	ts=$(stat -f '%Sm' $ZSH/.git/FETCH_HEAD || echo 'missing' )
+    ts=$(stat -f '%Sm' $ZSH/.git/FETCH_HEAD || echo 'missing' )
   else
-	mac=0
-	ts=$(stat -c %y $ZSH/.git/FETCH_HEAD || echo 'missing' )
+    ts=$(stat -c %y $ZSH/.git/FETCH_HEAD || echo 'missing' )
   fi
 
   prev=$( cat $ts_file || echo 'missing' )
