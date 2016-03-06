@@ -23,7 +23,7 @@ ts_file=~/.zsh-custom-update
 
 upgrade_custom() {
   printf '\033[0;34m%s\033[0m\n' "Upgrading the custom files"
-  cd "$ZSH_CUSTOM"
+  pushd "$ZSH_CUSTOM"
   if git pull --rebase --stat origin master
   then
     printf '\033[0;32m%s\033[0m\n' '                _                  '
@@ -36,6 +36,7 @@ upgrade_custom() {
   else
     printf '\033[0;31m%s\033[0m\n' 'There was an error updating. Try again later? You can trigger an update with: upgrade_custom'
   fi
+  popd
 }
 
 upgrade_custom_update() {
