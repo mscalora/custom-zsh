@@ -44,18 +44,20 @@ upgrade_custom_update() {
 }
 
 upgrade_custom_check() {
-  if [[ "$OSTYPE" == darwin* ]]; then
-    ts=$(stat -f '%Sm' $ZSH/.git/FETCH_HEAD || echo 'missing' )
-  else
-    ts=$(stat -c %y $ZSH/.git/FETCH_HEAD || echo 'missing' )
-  fi
-
-  prev=$( cat $ts_file || echo 'missing' )
-  if [[ "$ts" == $( cat $ts_file || echo 'missing' ) ]] ; then
-    #echo 'up to date'
-  else
-    upgrade_custom_update "$ts"
-    upgrade_custom    
+  if [[ -f $ZSH/.git/FETCH_HEAD ]] ; then
+    if [[ "$OSTYPE" == darwin* ]]; then
+      ts=$(stat -f '%Sm' $ZSH/.git/FETCH_HEAD || echo 'missing' )
+    else
+      ts=$(stat -c %y $ZSH/.git/FETCH_HEAD || echo 'missing' )
+    fi
+   
+    prev=$([[ -f $ts_file ]] && cat $ts_file || echo 'missing')
+    if [[ "$ts" == “$prev” ]] ; then
+      #echo 'up to date'
+    else
+      upgrade_custom_update "$ts"
+      upgrade_custom    
+    fi
   fi
 }
 
