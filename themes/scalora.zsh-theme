@@ -17,6 +17,14 @@ setopt prompt_subst
 alias hist='history | egrep '
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# custom keys
+
+bindkey "\x1b\x1b\x5b\x41" beginning-of-line  # option up for iTerm
+bindkey "\x1b\x1b\x5b\x42" end-of-line        # option down for iTerm
+bindkey "\x1b\x1b\x5b\x43" forward-word       # option right for iTerm
+bindkey "\x1b\x1b\x5b\x44" backward-word      # option left for iTerm
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # self-update
 
 ts_file=~/.zsh-custom-update
