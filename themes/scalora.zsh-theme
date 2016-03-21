@@ -26,6 +26,9 @@ bindkey "\x1b\x1b\x5b\x42" end-of-line        # option down for iTerm
 bindkey "\x1b\x1b\x5b\x43" forward-word       # option right for iTerm
 bindkey "\x1b\x1b\x5b\x44" backward-word      # option left for iTerm
 
+bindkey "^[[:u" undo
+bindkey "^[[:r" redo
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # self-update
 
