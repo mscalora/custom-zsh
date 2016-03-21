@@ -11,6 +11,8 @@ autoload -Uz vcs_info
 PR_GIT_UPDATE=1
 setopt prompt_subst
 
+setopt histignorespace
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # theme aliases
 
@@ -52,17 +54,20 @@ upgrade_custom_update() {
 }
 
 upgrade_custom_check() {
+  local ts
+  local prev='missing-ts'
   if [[ -f $ZSH/.git/FETCH_HEAD ]] ; then
     if [[ "$OSTYPE" == darwin* ]]; then
       ts=$(stat -f '%Sm' $ZSH/.git/FETCH_HEAD || echo 'missing' )
     else
       ts=$(stat -c %y $ZSH/.git/FETCH_HEAD || echo 'missing' )
     fi
-   
-    prev=$([[ -f $ts_file ]] && cat $ts_file || echo 'missing')
-    if [[ "$ts" == “$prev” ]] ; then
-      #echo 'up to date'
-    else
+
+    if [[ -f $ts_file ]] ; then
+      prev=$(cat $ts_file)
+    fi
+
+    if [[ $ts != $prev ]] ; then
       upgrade_custom_update "$ts"
       upgrade_custom    
     fi
