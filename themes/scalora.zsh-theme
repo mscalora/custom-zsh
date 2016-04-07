@@ -19,6 +19,22 @@ setopt histignorespace
 alias hist='history | egrep '
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# theme aliases
+
+autoload -Uz modify-current-argument
+
+expand-and-abspath () {
+    REPLY=${~1}
+    REPLY=${REPLY:a}
+}
+
+abspath-word() {
+    modify-current-argument expand-and-abspath
+}
+
+zle -N abspath-word
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # custom keys
 
 bindkey "\x1b\x1b\x5b\x41" beginning-of-line  # option up for iTerm
@@ -28,6 +44,8 @@ bindkey "\x1b\x1b\x5b\x44" backward-word      # option left for iTerm
 
 bindkey "^[[:u" undo
 bindkey "^[[:r" redo
+
+bindkey "å" abspath-word
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # self-update
