@@ -34,6 +34,10 @@ abspath-word() {
 
 zle -N abspath-word
 
+swap-quotes() { BUFFER="$( echo -n "$BUFFER" | tr "\"'" "'\"")" }
+
+zle -N swap-quotes
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # custom keys
 
@@ -46,6 +50,7 @@ bindkey "^[[:u" undo
 bindkey "^[[:r" redo
 
 bindkey "å" abspath-word
+bindkey "ß" swap-quotes
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # self-update
