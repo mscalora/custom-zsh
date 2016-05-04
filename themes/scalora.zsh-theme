@@ -34,6 +34,16 @@ abspath-word() {
 
 zle -N abspath-word
 
+rel-arg-to-cwd() {
+	REPLY="`python -c 'import os, sys ; sys.stdout.write(os.path.relpath(sys.argv[1]))' $1`"
+}
+
+relpath-word() {
+    modify-current-argument rel-arg-to-cwd
+}
+
+zle -N relpath-word
+
 swap-quotes() { BUFFER="$( echo -n "$BUFFER" | tr "\"'" "'\"")" }
 
 zle -N swap-quotes
@@ -50,6 +60,7 @@ bindkey "^[[:u" undo
 bindkey "^[[:r" redo
 
 bindkey "å" abspath-word
+bindkey "Å" relpath-word
 bindkey "ß" swap-quotes
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
