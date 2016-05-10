@@ -200,7 +200,7 @@ function virtualenv_info {
 
 # detect if this is a remote connection
 remote=0
-if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ] || [ $PPID -eq 0 ]; then
   remote=1
 else
   case $(ps -o comm= -p $PPID) in
@@ -229,7 +229,7 @@ ZSYSNAME=${OVERRIDE_SYSNAME:-$(echo $(hostname) | cut -d "." -f1)}
 
 PROMPT=$'
 %{$purple%}%n%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
-$ '
+${ZPTAIL-$ }'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # final return status prompt
