@@ -39,7 +39,7 @@ rel-arg-to-cwd() {
 }
 
 relpath-word() {
-    modify-current-argument rel-arg-to-cwd
+  modify-current-argument rel-arg-to-cwd
 }
 
 zle -N relpath-word
@@ -47,6 +47,16 @@ zle -N relpath-word
 swap-quotes() { BUFFER="$( echo -n "$BUFFER" | tr "\"'" "'\"")" }
 
 zle -N swap-quotes
+
+code() {
+  if [ -d "/Applications/Visual Studio Code.app" ] ; then
+    open -a "/Applications/Visual Studio Code.app" $*
+  elif [ -d "/Applications/Code.app" ] ; then
+    open -a "/Applications/Code.app" $*
+  else
+    open "https://code.visualstudio.com/download"
+  fi
+}
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # custom keys
