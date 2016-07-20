@@ -74,6 +74,13 @@ bindkey "Å" relpath-word
 bindkey "ß" swap-quotes
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# extra completions
+
+for inc in $ZSH_CUSTOM/plugins/*.inc(.N) ; do 
+  source $inc
+done
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # self-update
 
 ts_file=~/.zsh-custom-update
