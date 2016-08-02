@@ -17,6 +17,12 @@ setopt histignorespace
 # theme aliases
 
 alias hist='history | egrep '
+if [ "$(uname)" = "Darwin" ] ; then
+  # Mac only aliases
+  alias usb="ioreg -p IOUSB"
+else
+  # Linux only aliases
+fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # theme aliases
@@ -47,6 +53,9 @@ zle -N relpath-word
 swap-quotes() { BUFFER="$( echo -n "$BUFFER" | tr "\"'" "'\"")" }
 
 zle -N swap-quotes
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# smart alias type functions
 
 code() {
   if [ -d "/Applications/Visual Studio Code.app" ] ; then
