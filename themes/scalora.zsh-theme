@@ -16,7 +16,54 @@ setopt histignorespace
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # theme aliases
 
-alias hist='history | egrep '
+function hist {
+  CI=""
+  if [[ "$1" == "--help" || "$1" == "-h" || "$1" == "-?" ]] then
+    echo "Usage:"
+    echo "    $0 [ -i ] <number>       - show last <number> items"
+    echo "    $0 [ -i ] <regexp>       - search history for <regexp>"
+    echo "    $0 [ -i ] <regexp> <number>  - show last <number> items that match <regexp>"
+    echo "    $0 [ -i ] <number> <regexp>  - search last <number> items for <regexp>"
+    echo "    $0 [ -i ] <regexp1> <regexp2>  - search history for <regexp1> AND <regexp2>"
+    echo "    $0 <number1> <number2>     - show <number2> items starting at <number1>"
+    echo ""
+    echo "  Options:"
+    echo "    -i         - use case insensitive search for regexp"
+    echo "    --help -h or -?  - show this help"
+    echo ""
+  else  
+    if [[ "$1" == "-i" ]] then
+      CI="-i"
+      shift
+    fi
+    if [[ "$1" == "" ]] ; then
+      echo "Last 50 history items"
+      history | tail -n 50
+    elif [[ $1 =~ [0-9]+ ]] ; then
+      if [[ "$2" == "" ]] ; then
+        echo "Last $1 history items"
+        history | tail -n $1
+      elif [[ "$2" =~ [0-9]+ ]] ; then
+        echo "History items $1 through $(( $1 + $2 ))"
+        history | head -n $(( $1 + $2 )) | tail -n $2
+      else
+        echo "Last $1 history items that also match $2"
+        history | tail -n $1 | egrep $CI $2
+      fi
+    else
+      if [[ "$2" == "" ]] ; then
+        echo "History items that match $1"
+        history | egrep $CI $1
+      elif [[ "$2" =~ [0-9]+ ]] ; then
+        echo "Last $2 matches of $1 in history"
+        history | egrep $CI $1 | tail -n $2
+      else
+        echo "History items that match $1 and $2"
+        history | egrep $CI $1 | egrep $CI $2
+      fi
+    fi
+  fi
+}
 if [ "$(uname)" = "Darwin" ] ; then
   # Mac only aliases
   alias usb="ioreg -p IOUSB"
