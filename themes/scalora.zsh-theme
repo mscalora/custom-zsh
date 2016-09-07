@@ -1,4 +1,7 @@
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+#! /usr/bin/env zsh
+# to help editors with syntax coloring etc.
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # theme autoloads
 
 autoload colors
@@ -31,7 +34,7 @@ function hist {
     echo "    -i         - use case insensitive search for regexp"
     echo "    --help -h or -?  - show this help"
     echo ""
-  else  
+  else
     if [[ "$1" == "-i" ]] then
       CI="-i"
       shift
@@ -64,15 +67,16 @@ function hist {
     fi
   fi
 }
+
+# platform specific aliases
+
 if [ "$(uname)" = "Darwin" ] ; then
   # Mac only aliases
   alias usb="ioreg -p IOUSB"
 else
   # Linux only aliases
+  alias usb=lsusb
 fi
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-# theme aliases
 
 autoload -Uz modify-current-argument
 
@@ -104,8 +108,14 @@ zle -N swap-quotes
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # smart alias type functions
 
+export NATIVE_CODE="$(which code)"
+
 code() {
-  if [ -d "/Applications/Visual Studio Code.app" ] ; then
+  if [ $REMOTE_SESSION == 1 ] ; then
+    ${EDITOR:?nano} $*
+  elif [ -x "$NATIVE_CODE" ] ; then
+    "$NATIVE_CODE" $*
+  elif [ -d "/Applications/Visual Studio Code.app" ] ; then
     open -a "/Applications/Visual Studio Code.app" $*
   elif [ -d "/Applications/Code.app" ] ; then
     open -a "/Applications/Code.app" $*
@@ -113,6 +123,42 @@ code() {
     open "https://code.visualstudio.com/download"
   fi
 }
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# local system setup
+
+setup_nano() {
+  echo "# AUTO CREATED NANORC FILE" >>~/.nanorc
+  echo "set quiet" >>~/.nanorc
+  echo "set autoindent" >>~/.nanorc
+  echo "set constantshow" >>~/.nanorc
+  echo "set positionlog" >>~/.nanorc
+  echo "set tabsize 4" >>~/.nanorc
+  echo "set tabstospaces" >>~/.nanorc
+  echo "set nowrap" >>~/.nanorc
+  echo "set suspend" >>~/.nanorc
+  echo "set titlecolor brightyellow,blue" >>~/.nanorc
+  echo "set statuscolor brightyellow,blue" >>~/.nanorc
+  echo "bind ^S savefile main" >>~/.nanorc
+  echo "bind ^G findnext main" >>~/.nanorc
+  echo "bind M-G findprevious main" >>~/.nanorc
+  if [ ! -d $HOME/temp/nano-backups ] ; then
+    mkdir $HOME/temp/nano-backups
+  fi
+  echo "set backupdir $HOME/temp/nano-backups" >>~/.nanorc
+  # try to find the best path to nanorc syntax file files
+  find -L /usr/local/share -mount \! -perm -g+r,u+r,o+r -prune -o -name css.nanorc -print | head -n 1 | sed -e 's/css/*/' | sed -e 's/^/include /' >>~/.nanorc
+
+  echo "=================================================="
+  echo "A nice .nanorc file was created for you, it won't"
+  echo "have any affect unless you run nano. You can turn"
+  echo "off all of the affects of this change by running:"
+  echo "echo \"#\" >~/.nanorc"
+  echo "=================================================="
+}
+
+[ ! -f ~/.nanorc ] && setup_nano
+unset -f setup_nano
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # custom keys
@@ -272,13 +318,13 @@ function virtualenv_info {
 # detect remote connections
 
 # detect if this is a remote connection
-remote=0
+export REMOTE_SESSION=0
 if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ] || [ $PPID -eq 0 ]; then
-  remote=1
+  export REMOTE_SESSION=1
 else
   case $(ps -o comm= -p $PPID) in
     sshd|*/sshd) 
-      remote=1
+      export REMOTE_SESSION=1
     ;;
   esac
 fi
@@ -288,8 +334,8 @@ fi
 
 local_color=${ZLOCALCOLOR:-$orange}
 remote_color=${ZREMOTECOLOR:-$bg[green]$fg[black]}
-[[ $remote = 1 ]] && PAD=" " || PAD=""
-[[ $remote = 1 ]] && ZHOST_COLOR="$remote_color" || ZHOST_COLOR="$local_color"
+[[ $REMOTE_SESSION = 1 ]] && PAD=" " || PAD=""
+[[ $REMOTE_SESSION = 1 ]] && ZHOST_COLOR="$remote_color" || ZHOST_COLOR="$local_color"
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # override system names
