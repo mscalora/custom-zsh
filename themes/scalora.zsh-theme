@@ -21,7 +21,7 @@ setopt histignorespace
 
 function hist {
   CI=""
-  if [[ "$1" == "--help" || "$1" == "-h" || "$1" == "-?" ]] then
+  if [[ "$1" == "--help" || "$1" == "-h" || "$1" == "-?" ]] ; then
     echo "Usage:"
     echo "    $0 [ -i ] <number>       - show last <number> items"
     echo "    $0 [ -i ] <regexp>       - search history for <regexp>"
@@ -80,30 +80,43 @@ fi
 
 autoload -Uz modify-current-argument
 
-expand-and-abspath () {
-    REPLY=${~1}
-    REPLY=${REPLY:a}
+function toggle-path-py {
+  REPLY="$(python - $1 <<EOF
+"Toggle between relative and absolute path, surrounding quotes or initial quote"
+import os, sys
+a = sys.argv[1]
+f = a[:1]
+e = ''
+if f == '~':
+  a = os.path.expanduser(a)
+  f = ''
+elif f == '"' or f == "'":
+  a = a[1:]
+  if a[-1:] == f:
+    e = f
+    a = a[:-1]
+else:
+  f = ''
+b = os.path.relpath(a) if a[:1] == '/' else os.path.abspath(a)
+sys.stdout.write(f+b+e)
+EOF
+)"
 }
 
-abspath-word() {
-    modify-current-argument expand-and-abspath
+function toggle-path {
+  modify-current-argument toggle-path-py
 }
 
-zle -N abspath-word
+zle -N toggle-path
+bindkey "å" toggle-path
+bindkey "\ea" toggle-path
 
-rel-arg-to-cwd() {
-	REPLY="`python -c 'import os, sys ; sys.stdout.write(os.path.relpath(sys.argv[1]))' $1`"
+swap-quotes() {
+  BUFFER="$( echo -n "$BUFFER" | tr "\"'" "'\"")"
 }
-
-relpath-word() {
-  modify-current-argument rel-arg-to-cwd
-}
-
-zle -N relpath-word
-
-swap-quotes() { BUFFER="$( echo -n "$BUFFER" | tr "\"'" "'\"")" }
 
 zle -N swap-quotes
+bindkey "ß" swap-quotes
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # smart alias type functions
@@ -170,10 +183,6 @@ bindkey "\x1b\x1b\x5b\x44" backward-word      # option left for iTerm
 
 bindkey "^[[:u" undo
 bindkey "^[[:r" redo
-
-bindkey "å" abspath-word
-bindkey "Å" relpath-word
-bindkey "ß" swap-quotes
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # for extra completions, any .inc file in plugins is included
