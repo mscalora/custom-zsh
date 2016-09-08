@@ -91,9 +91,10 @@ if f == '~':
   a = os.path.expanduser(a)
   f = ''
 elif f == '"' or f == "'":
+  a = a[1:]
   if a[-1:] == f:
     e = f
-    a = a[1:-1]
+    a = a[:-1]
 else:
   f = ''
 b = os.path.relpath(a) if a[:1] == '/' else os.path.abspath(a)
