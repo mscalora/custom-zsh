@@ -19,7 +19,7 @@ setopt histignorespace
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # theme aliases
 
-function hist {
+hist() {
   CI=""
   if [[ "$1" == "--help" || "$1" == "-h" || "$1" == "-?" ]] ; then
     echo "Usage:"
@@ -80,7 +80,7 @@ fi
 
 autoload -Uz modify-current-argument
 
-function toggle-path-py {
+toggle-path-py() {
   REPLY="$(python - $1 <<EOF
 "Toggle between relative and absolute path, surrounding quotes or initial quote"
 import os, sys
@@ -103,20 +103,64 @@ EOF
 )"
 }
 
-function toggle-path {
+toggle-path() {
   modify-current-argument toggle-path-py
 }
 
 zle -N toggle-path
-bindkey "å" toggle-path
-bindkey "\ea" toggle-path
+bindkey "å" toggle-path    # OPTION-a
+bindkey "\ea" toggle-path  # ESC-a
+
+toggle-case() {
+  if [[ "$1" =~ '^[^a-z]*$' ]] ; then
+    REPLY="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  else
+    REPLY="$(echo "$1" | tr '[:lower:]' '[:upper:]')"
+  fi
+}
+
+toggle-case-word() {
+  modify-current-argument toggle-case
+}
+
+toggle-case-all() {
+  toggle-case "$BUFFER"
+  BUFFER="$REPLY"
+}
+
+zle -N toggle-case-word
+zle -N toggle-case-all
+bindkey "¬" toggle-case-word  # OPTION-l
+bindkey "Ò" toggle-case-all   # OPTION-SHIFT-L
 
 swap-quotes() {
+  if [[ "$1" =~ "[\"']" ]] ; then
+    REPLY="$( echo -n "$1" | tr "\"'" "'\"")"
+  else
+    REPLY="'$1'"
+  fi
+}
+
+swap-quotes-word() {
+  modify-current-argument swap-quotes
+}
+
+swap-quotes-all() {
   BUFFER="$( echo -n "$BUFFER" | tr "\"'" "'\"")"
 }
 
-zle -N swap-quotes
-bindkey "ß" swap-quotes
+zle -N swap-quotes-all
+zle -N swap-quotes-word
+bindkey "Œ" swap-quotes-all  # OPTION-SHIFT-Q
+bindkey "œ" swap-quotes-word # OPTION-q
+
+send-to-history() {
+  print -S "$BUFFER"
+  BUFFER=
+}
+
+zle -N send-to-history
+bindkey '˙' send-to-history
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # smart alias type functions
@@ -282,7 +326,7 @@ zstyle ':vcs_info:*:prompt:*' nvcsformats   ""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # custom hooks
 
-function z_custom_preexec {
+z_custom_preexec() {
     case "$(history $HISTCMD)" in
         *git*)
             PR_GIT_UPDATE=1
@@ -294,12 +338,12 @@ function z_custom_preexec {
 }
 add-zsh-hook preexec z_custom_preexec
 
-function z_custom_chpwd {
+z_custom_chpwd() {
     PR_GIT_UPDATE=1
 }
 add-zsh-hook chpwd z_custom_chpwd
 
-function z_custom_precmd {
+z_custom_precmd() {
     if [[ -n "$PR_GIT_UPDATE" ]] ; then
         # check for untracked files or updated submodules, since vcs_info doesn't
         if git ls-files --other --exclude-standard 2> /dev/null | grep -q "."; then
@@ -319,7 +363,7 @@ add-zsh-hook precmd z_custom_precmd
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # virtual environment info
 
-function virtualenv_info {
+virtualenv_info() {
     [ $VIRTUAL_ENV ] && echo '('$fg[blue]`basename $VIRTUAL_ENV`%{$reset_color%}') '
 }
 
