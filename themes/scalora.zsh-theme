@@ -376,7 +376,7 @@ if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ] || [ $PPID -eq 0 ]; then
   export REMOTE_SESSION=1
 else
   case $(ps -o comm= -p $PPID) in
-    sshd|*/sshd) 
+    su|sshd|*/sshd) 
       export REMOTE_SESSION=1
     ;;
   esac
@@ -396,11 +396,22 @@ remote_color=${ZREMOTECOLOR:-$bg[green]$fg[black]}
 OVERRIDE_SYSNAME=${PROMPT_SYS_NAME:-$ZSYSNAME}
 ZSYSNAME=${OVERRIDE_SYSNAME:-$(echo $(hostname) | cut -d "." -f1)}
 
+if [[ "$(ps -o comm= -p $PPID)" == "su" ]] ; then
+  SUING="su as "
+else
+  SUING=""
+fi
+
+UNAME="$SUING%n"
+if [[ "$(whoami)" == "root" ]] ; then
+  UNAME="$bg[red]$fg[yellow] $SUING%n "
+fi
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # final prompt
 
 PROMPT=$'
-%{$purple%}%n%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
+%{$purple%}$UNAME%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
 ${ZPTAIL-$ }'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -415,5 +426,3 @@ ${ZPTAIL-$ }'
 # RESET=$reset_color
 
 export RPS1="%(?..%{$fg_bold[yellow]%}%? ↵%{$reset_color%})"
-
-
