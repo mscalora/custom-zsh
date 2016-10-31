@@ -8,7 +8,7 @@ autoload colors
 autoload -U add-zsh-hook
 autoload -Uz vcs_info
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # theme options
 
 PR_GIT_UPDATE=1
@@ -16,7 +16,12 @@ setopt prompt_subst
 
 setopt histignorespace
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# autoload function setup
+
+FPATH=$ZSH_CUSTOM/functions:$FPATH
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # theme aliases
 
 hist() {
@@ -162,6 +167,10 @@ send-to-history() {
 zle -N send-to-history
 bindkey '˙' send-to-history
 
+autoload -Uz zle-delete-last-parameter
+zle -N zle-delete-last-parameter
+bindkey '∑' zle-delete-last-parameter
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # smart alias type functions
 
@@ -185,6 +194,7 @@ code() {
 # local system setup
 
 setup_nano() {
+  read -d '' nanorc <<"EOF"
   echo "# AUTO CREATED NANORC FILE" >>~/.nanorc
   echo "set quiet" >>~/.nanorc
   echo "set autoindent" >>~/.nanorc
@@ -203,6 +213,16 @@ setup_nano() {
     mkdir $HOME/temp/nano-backups
   fi
   echo "set backupdir $HOME/temp/nano-backups" >>~/.nanorc
+  echo "" >>~/.nanorc
+  echo "set numbercolor cyan,black" >>~/.nanorc
+  echo "set linenumbers" >>~/.nanorc
+  echo "set keycolor cyan,black" >>~/.nanorc
+  echo "set functioncolor blue,black" >>~/.nanorc
+  echo "" >>~/.nanorc
+  echo "# -----1----- # put personal settings under this line # ----- #" >>~/.nanorc
+  echo "" >>~/.nanorc
+EOF
+
   # try to find the best path to nanorc syntax file files
   find -L /usr/local/share -mount \! -perm -g+r,u+r,o+r -prune -o -name css.nanorc -print | head -n 1 | sed -e 's/css/*/' | sed -e 's/^/include /' >>~/.nanorc
 
@@ -217,7 +237,7 @@ setup_nano() {
 [ ! -f ~/.nanorc ] && setup_nano
 unset -f setup_nano
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # custom keys
 
 bindkey "\x1b\x1b\x5b\x41" beginning-of-line  # option up for iTerm
@@ -228,14 +248,14 @@ bindkey "\x1b\x1b\x5b\x44" backward-word      # option left for iTerm
 bindkey "^[[:u" undo
 bindkey "^[[:r" redo
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # for extra completions, any .inc file in plugins is included
 
-for inc in $ZSH_CUSTOM/plugins/*.inc(.N) ; do 
+for inc in $ZSH_CUSTOM/plugins/*.inc(.N) ; do
   source $inc
 done
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # self-update
 
 ts_file=~/.zsh-custom-update
@@ -278,14 +298,14 @@ upgrade_custom_check() {
 
     if [[ $ts != $prev ]] ; then
       upgrade_custom_update "$ts"
-      upgrade_custom    
+      upgrade_custom
     fi
   fi
 }
 
 upgrade_custom_check
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # theme color vars
 
 colors
@@ -305,7 +325,7 @@ else
     limegreen="$fg[green]"
 fi
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # style section
 
 zstyle ':vcs_info:*' enable git svn
@@ -323,7 +343,7 @@ zstyle ':vcs_info:*:prompt:*' actionformats "${FMT_BRANCH}${FMT_ACTION}"
 zstyle ':vcs_info:*:prompt:*' formats       "${FMT_BRANCH}"
 zstyle ':vcs_info:*:prompt:*' nvcsformats   ""
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # custom hooks
 
 z_custom_preexec() {
@@ -360,14 +380,14 @@ z_custom_precmd() {
 }
 add-zsh-hook precmd z_custom_precmd
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # virtual environment info
 
 virtualenv_info() {
     [ $VIRTUAL_ENV ] && echo '('$fg[blue]`basename $VIRTUAL_ENV`%{$reset_color%}') '
 }
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # detect remote connections
 
 # detect if this is a remote connection
@@ -382,7 +402,7 @@ else
   esac
 fi
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # host colors
 
 local_color=${ZLOCALCOLOR:-$orange}
@@ -390,7 +410,7 @@ remote_color=${ZREMOTECOLOR:-$bg[green]$fg[black]}
 [[ $REMOTE_SESSION = 1 ]] && PAD=" " || PAD=""
 [[ $REMOTE_SESSION = 1 ]] && ZHOST_COLOR="$remote_color" || ZHOST_COLOR="$local_color"
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # override system names
 
 OVERRIDE_SYSNAME=${PROMPT_SYS_NAME:-$ZSYSNAME}
@@ -407,14 +427,14 @@ if [[ "$(whoami)" == "root" ]] ; then
   UNAME="$bg[red]$fg[yellow] $SUING%n "
 fi
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # final prompt
 
 PROMPT=$'
 %{$purple%}$UNAME%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
 ${ZPTAIL-$ }'
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # final return status prompt
 
 # R=$fg[red]
