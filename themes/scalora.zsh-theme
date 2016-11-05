@@ -174,10 +174,10 @@ bindkey '∑' zle-delete-last-parameter
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # smart alias type functions
 
-export NATIVE_CODE="$(which code)"
+export NATIVE_CODE="$(which code 2>/dev/null)"
 
 code() {
-  if [ $REMOTE_SESSION == 1 ] ; then
+  if [[ $REMOTE_SESSION == 1 ]] ; then
     ${EDITOR:?nano} $*
   elif [ -x "$NATIVE_CODE" ] ; then
     "$NATIVE_CODE" $*
