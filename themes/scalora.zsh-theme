@@ -194,34 +194,35 @@ code() {
 # local system setup
 
 setup_nano() {
-  read -d '' nanorc <<"EOF"
-  echo "# AUTO CREATED NANORC FILE" >>~/.nanorc
-  echo "set quiet" >>~/.nanorc
-  echo "set autoindent" >>~/.nanorc
-  echo "set constantshow" >>~/.nanorc
-  echo "set positionlog" >>~/.nanorc
-  echo "set tabsize 4" >>~/.nanorc
-  echo "set tabstospaces" >>~/.nanorc
-  echo "set nowrap" >>~/.nanorc
-  echo "set suspend" >>~/.nanorc
-  echo "set titlecolor brightyellow,blue" >>~/.nanorc
-  echo "set statuscolor brightyellow,blue" >>~/.nanorc
-  echo "bind ^S savefile main" >>~/.nanorc
-  echo "bind ^G findnext main" >>~/.nanorc
-  echo "bind M-G findprevious main" >>~/.nanorc
+  cat >>~/.nanorc <<"EOF"
+# AUTO CREATED NANORC FILE
+set quiet
+set autoindent
+set constantshow
+set positionlog
+set tabsize 4
+set tabstospaces
+set nowrap
+set suspend
+set titlecolor brightyellow,blue
+set statuscolor brightyellow,blue
+bind ^S savefile main
+bind ^G findnext main
+bind M-G findprevious main
+set backupdir $HOME/temp/nano-backups
+
+set numbercolor cyan,black
+set linenumbers
+set keycolor cyan,black
+set functioncolor blue,black
+
+# ----- # put personal settings under this line # ----- #
+
+EOF
+
   if [ ! -d $HOME/temp/nano-backups ] ; then
     mkdir $HOME/temp/nano-backups
   fi
-  echo "set backupdir $HOME/temp/nano-backups" >>~/.nanorc
-  echo "" >>~/.nanorc
-  echo "set numbercolor cyan,black" >>~/.nanorc
-  echo "set linenumbers" >>~/.nanorc
-  echo "set keycolor cyan,black" >>~/.nanorc
-  echo "set functioncolor blue,black" >>~/.nanorc
-  echo "" >>~/.nanorc
-  echo "# -----1----- # put personal settings under this line # ----- #" >>~/.nanorc
-  echo "" >>~/.nanorc
-EOF
 
   # try to find the best path to nanorc syntax file files
   find -L /usr/local/share -mount \! -perm -g+r,u+r,o+r -prune -o -name css.nanorc -print | head -n 1 | sed -e 's/css/*/' | sed -e 's/^/include /' >>~/.nanorc
@@ -235,7 +236,7 @@ EOF
 }
 
 [ ! -f ~/.nanorc ] && setup_nano
-unset -f setup_nano
+#unset -f setup_nano
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # custom keys
