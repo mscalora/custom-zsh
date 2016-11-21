@@ -1,0 +1,28 @@
+# -*- mode: sh -*-
+#ssh-clear() {
+    if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]] ; then
+      echo ""
+      echo "    $0 [ --help | --undo | HOST ]"
+      echo ""
+      echo "Without args shows list of hosts in ~/.ssh/known_hosts"
+      echo "HOST can be any ip address or hostname that appears in ~/.ssh/known_hosts"
+      echo ""
+    elif [[ "$1" == "--undo" ]] ; then
+      if [[ ! -f ~/temp/known_hosts.backup ]] ; then
+        printf "\e[33mERROR: Nothing to undo\e[0m\n"
+        return 1
+      else        
+        cp ~/temp/known_hosts.backup ~/.ssh/known_hosts
+      fi
+    elif [[ "$1" == "" ]] ; then
+      cat ~/.ssh/known_hosts | cut -c 1-70 | sed -e 's/$/.../' | egrep --color '^[^ ]*'  
+    else
+      local BEFORE=$( cat ~/.ssh/known_hosts | wc -l )
+      cp ~/.ssh/known_hosts ~/temp/known_hosts.backup
+      cat ~/temp/known_hosts.backup | fgrep -v "$1" >~/.ssh/known_hosts
+      local AFTER=$( cat ~/.ssh/known_hosts | wc -l )
+      echo "$(( $BEFORE - $AFTER )) lines removed"
+      echo cat ~/temp/known_hosts.backup | fgrep --color "$1"
+      printf "Use \e[33mssh-clear --undo\e[0m to undo\n\n"
+    fi
+#}

@@ -191,52 +191,23 @@ code() {
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# local system setup
+# autoload stuff
 
-setup_nano() {
-  cat >>~/.nanorc <<"EOF"
-# AUTO CREATED NANORC FILE
-set quiet
-set autoindent
-set constantshow
-set positionlog
-set tabsize 4
-set tabstospaces
-set nowrap
-set suspend
-set titlecolor brightyellow,blue
-set statuscolor brightyellow,blue
-bind ^S savefile main
-bind ^G findnext main
-bind M-G findprevious main
-set backupdir $HOME/temp/nano-backups
+autoload setup-nanorc
+[ ! -f ~/.nanorc ] && setup-nanorc
+unset -f setup-nanorc
 
-set numbercolor cyan,black
-set linenumbers
-set keycolor cyan,black
-set functioncolor blue,black
+autoload ssh-clear
 
-# ----- # put personal settings under this line # ----- #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# command options
 
-EOF
-
-  if [ ! -d $HOME/temp/nano-backups ] ; then
-    mkdir $HOME/temp/nano-backups
-  fi
-
-  # try to find the best path to nanorc syntax file files
-  find -L /usr/local/share -mount \! -perm -g+r,u+r,o+r -prune -o -name css.nanorc -print | head -n 1 | sed -e 's/css/*/' | sed -e 's/^/include /' >>~/.nanorc
-
-  echo "=================================================="
-  echo "A nice .nanorc file was created for you, it won't"
-  echo "have any affect unless you run nano. You can turn"
-  echo "off all of the affects of this change by running:"
-  echo "echo \"#\" >~/.nanorc"
-  echo "=================================================="
-}
-
-[ ! -f ~/.nanorc ] && setup_nano
-#unset -f setup_nano
+# syntax coloring if gnu 
+# Mac: brew install source-highlight
+# apt: sudo apt-get install source-highlight
+if hash src-hilite-lesspipe.sh 2>/dev/null; then
+  export LESSOPEN="| $(which src-hilite-lesspipe.sh) %s"
+fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # custom keys
