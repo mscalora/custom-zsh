@@ -47,11 +47,11 @@ hist() {
     if [[ "$1" == "" ]] ; then
       echo "Last 50 history items"
       history | tail -n 50
-    elif [[ $1 =~ [0-9]+ ]] ; then
+    elif [[ $1 =~ ^[0-9]+$ ]] ; then
       if [[ "$2" == "" ]] ; then
         echo "Last $1 history items"
         history | tail -n $1
-      elif [[ "$2" =~ [0-9]+ ]] ; then
+      elif [[ "$2" =~ ^[0-9]+$ ]] ; then
         echo "History items $1 through $(( $1 + $2 ))"
         history | head -n $(( $1 + $2 )) | tail -n $2
       else
@@ -187,6 +187,30 @@ code() {
     open -a "/Applications/Code.app" $*
   else
     open "https://code.visualstudio.com/download"
+  fi
+}
+
+wls() {
+  if [[ "$1" == "" ]] ; then
+    printf "Usage:  wls <command>\n"
+    return
+  fi
+  if ! type "$1" ; then
+    return
+  fi
+  local ctype="$(type "$1")"
+  if [[ "$ctype" =~ " not found" ]] ; then
+    echo "NOT FOUND"
+  elif [[ "$ctype" =~ " is an alias" ]] ; then
+    echo "ALIAS"
+  elif [[ "$ctype" =~ " is a shell function" ]] ; then
+    echo "FUNCTION"
+  elif [[ "$ctype" =~ " is a shell builtin" ]] ; then
+    echo "SHELL BUILTIN"
+  elif [[ "$ctype" =~ " is " ]] ; then
+    echo "PROGRAM IN PATH"
+    local cpath="$(which "$1")"
+    ls -la "$cpath"
   fi
 }
 
