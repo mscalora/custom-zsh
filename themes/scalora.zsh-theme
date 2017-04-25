@@ -24,6 +24,14 @@ FPATH=$ZSH_CUSTOM/functions:$FPATH
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # theme aliases
 
+ts() {
+  date +"%Y-%m-%dT%H:%M:%S"
+}
+
+tss() {
+  python -c "import datetime ; print datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]"
+}
+
 hist() {
   CI=""
   if [[ "$1" == "--help" || "$1" == "-h" || "$1" == "-?" ]] ; then
