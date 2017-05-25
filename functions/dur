@@ -1,0 +1,7 @@
+# -*- mode: sh -*-
+#dur() {
+  if [[ "$2" == "" ]] ; then
+    echo "Usage: dur <time-in-ms> <time-in-ms>"
+  fi
+  echo "$(( ( $1 - $2 ) / 60000 )) min $(( ( $1 - $2 ) % 60000 / 1000 )) sec"
+#}
