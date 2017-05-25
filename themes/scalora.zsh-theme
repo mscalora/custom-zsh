@@ -230,6 +230,7 @@ autoload setup-nanorc
 unset -f setup-nanorc
 
 autoload ssh-clear
+autoload dur
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # command options
