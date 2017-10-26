@@ -47,6 +47,17 @@ hist() {
     echo "    -i         - use case insensitive search for regexp"
     echo "    --help -h or -?  - show this help"
     echo ""
+  elif [[ "$1" == "-e" || "$1" == "--edit" ]] ; then
+    fc -W
+    if [[ -e ~/temp ]] ; then
+      BACKUP_HISTORY=~/temp/zsh_history-backup-$(date "+%Y%m%d").txt
+    else
+      BACKUP_HISTORY=/tmp/zsh_history-backup-$(date "+%Y%m%d").txt
+    fi
+    cp ~/.zsh_history $BACKUP_HISTORY
+    printf '\033[0;34m%s\033[0;32m%s\033[0m\n' "ZSH command history backed up to " "$BACKUP_HISTORY"
+    nano +999999 ~/.zsh_history
+    fc -R
   else
     if [[ "$1" == "-i" ]] then
       CI="-i"
