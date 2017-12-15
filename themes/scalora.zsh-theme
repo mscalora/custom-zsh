@@ -262,7 +262,9 @@ bindkey "\x1b\x1b\x5b\x43" forward-word       # option right for iTerm
 bindkey "\x1b\x1b\x5b\x44" backward-word      # option left for iTerm
 
 bindkey "^[[:u" undo
+bindkey "Ω" undo
 bindkey "^[[:r" redo
+bindkey "¸" redo
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # for extra completions, any .inc file in plugins is included
