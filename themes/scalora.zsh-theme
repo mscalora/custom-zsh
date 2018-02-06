@@ -81,7 +81,7 @@ hist() {
       if [[ "$2" == "" ]] ; then
         echo "History items that match $1"
         history | egrep $CI $1
-      elif [[ "$2" =~ [0-9]+ ]] ; then
+      elif [[ "$2" =~ ^[0-9]+$ ]] ; then
         echo "Last $2 matches of $1 in history"
         history | egrep $CI $1 | tail -n $2
       else
