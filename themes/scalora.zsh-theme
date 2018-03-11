@@ -445,11 +445,24 @@ if [[ "$(whoami)" == "root" ]] ; then
   UNAME="$bg[red]$fg[yellow] $SUING%n "
 fi
 
+if ! declare -f extra_user_prompt > /dev/null ; then 
+  extra_user_prompt() {
+    echo -n '' 
+    # redefine this function to display something additional in your prompt
+    # for example, put the following line in your ~/.zshrc
+    #   extra_user_prompt() { echo -n 'Node ' ; node --version }
+    # to show your currently install version of node
+  }
+fi
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # final prompt
 
+XUSER_DEFAULT="$(tput bold)$(tput setaf 3)"
+XUSER="${XUSERCOLOR:-$XUSER_DEFAULT}"
+
 PROMPT=$'
-%{$purple%}$UNAME%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}
+%{$purple%}$UNAME%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}%{$XUSER%}$(extra_user_prompt)%{$reset_color%}
 ${ZPTAIL-$ }'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
