@@ -25,7 +25,7 @@ set functioncolor blue,black
 EOF
 
   if [ ! -d $HOME/temp/nano-backups ] ; then
-    mkdir $HOME/temp/nano-backups
+    mkdir -p $HOME/temp/nano-backups
   fi
 
   # try to find the best path to nanorc syntax file files
