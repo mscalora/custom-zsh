@@ -344,59 +344,11 @@ else
 fi
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# style section
-
-zstyle ':vcs_info:*' enable git svn
-zstyle ':vcs_info:*:prompt:*' check-for-changes true
+# git stuff
 
 PR_RST="%{${reset_color}%}"
-FMT_BRANCH="(%{$turquoise%}%b%u%c${PR_RST})"
-FMT_ACTION="(%{$limegreen%}%a${PR_RST})"
-FMT_UNSTAGED="%{$orange%}●"
-FMT_STAGED="%{$limegreen%}●"
 
-zstyle ':vcs_info:*:prompt:*' unstagedstr   "${FMT_UNSTAGED}"
-zstyle ':vcs_info:*:prompt:*' stagedstr     "${FMT_STAGED}"
-zstyle ':vcs_info:*:prompt:*' actionformats "${FMT_BRANCH}${FMT_ACTION}"
-zstyle ':vcs_info:*:prompt:*' formats       "${FMT_BRANCH}"
-zstyle ':vcs_info:*:prompt:*' nvcsformats   ""
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# custom hooks
-
-z_custom_preexec() {
-    case "$2" in
-        *git*)
-            PR_GIT_UPDATE=1
-            ;;
-        *svn*)
-            PR_GIT_UPDATE=1
-            ;;
-    esac
-}
-add-zsh-hook preexec z_custom_preexec
-
-z_custom_chpwd() {
-    PR_GIT_UPDATE=1
-}
-add-zsh-hook chpwd z_custom_chpwd
-
-z_custom_precmd() {
-    if [[ -n "$PR_GIT_UPDATE" ]] ; then
-        # check for untracked files or updated submodules, since vcs_info doesn't
-        if git ls-files --other --exclude-standard 2> /dev/null | grep -q "."; then
-            PR_GIT_UPDATE=1
-            FMT_BRANCH="(%{$turquoise%}%b%u%c%{$hotpink%}●${PR_RST})"
-        else
-            FMT_BRANCH="(%{$turquoise%}%b%u%c${PR_RST})"
-        fi
-        zstyle ':vcs_info:*:prompt:*' formats "${FMT_BRANCH} "
-
-        vcs_info 'prompt'
-        PR_GIT_UPDATE=
-    fi
-}
-add-zsh-hook precmd z_custom_precmd
+source $ZSH_CUSTOM/zshrc.sh
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # virtual environment info
@@ -462,7 +414,7 @@ XUSER_DEFAULT="$(tput bold)$(tput setaf 3)"
 XUSER="${XUSERCOLOR:-$XUSER_DEFAULT}"
 
 PROMPT=$'
-%{$purple%}$UNAME%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $vcs_info_msg_0_$(virtualenv_info)%{$reset_color%}%{$XUSER%}$(extra_user_prompt)%{$reset_color%}
+%{$purple%}$UNAME%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $(git_super_status)$(virtualenv_info)%{$reset_color%}%{$XUSER%}$(extra_user_prompt)%{$reset_color%}
 ${ZPTAIL-$ }'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
