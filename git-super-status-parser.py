@@ -219,10 +219,10 @@ def current_git_status(lines):
 def main():
     """
     This program can be run two ways:
-        1) `./gitstatus.py`
+        1) `./git-super-status-parser.py`
             Will wait on subprocess to execute below git status command.
 
-        2) `git status --branch --porcelain | ./gitstatus.py`
+        2) `git status --branch --porcelain | ./git-super-status-parser.py`
             Will read stdin and parse it.
     """
 
