@@ -8,6 +8,10 @@ Invoked by ./zshrc.sh automatically.
 import os
 import subprocess as sub
 import sys
+try:
+    import urllib.request as urllib
+except:
+    import urllib
 
 # Denotes no upstream set, impossible branch name per git ref spec
 SYM_NOUPSTREAM = '..'
@@ -197,19 +201,20 @@ def current_git_status(lines):
     Raises:
         IOError: There is no `.git` folder in the current folder hierarchy
     """
-    head_file, stash_file, merge_file, rebase_dir = git_paths(find_git_root())
+    git_root = find_git_root()
+    head_file, stash_file, merge_file, rebase_dir = git_paths(git_root)
     branch, upstream, local = parse_branch(lines[0], head_file)
     remote = parse_ahead_behind(lines[0])
     stats = parse_stats(lines[1:])
     stashes = stash_count(stash_file)
     merge = int(os.path.isfile(merge_file))
     rebase = rebase_progress(rebase_dir)
+    slug = urllib.quote(git_root)
 
     values = [str(x) for x in (branch,) + remote + stats +
-              (stashes, local, upstream, merge, rebase)]
+              (stashes, local, upstream, merge, rebase, slug)]
 
     return ' '.join(values)
-
 
 def main():
     """
@@ -220,6 +225,7 @@ def main():
         2) `git status --branch --porcelain | ./gitstatus.py`
             Will read stdin and parse it.
     """
+
     if not sys.stdin.isatty():
         lines = [line.rstrip() for line in sys.stdin.readlines()]
         err = u'\n'.join(lines)

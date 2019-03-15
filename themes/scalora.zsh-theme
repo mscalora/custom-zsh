@@ -346,15 +346,14 @@ fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # git stuff
 
-PR_RST="%{${reset_color}%}"
-
-source $ZSH_CUSTOM/zshrc.sh
+PRRST="$FX[reset]"
+source $ZSH_CUSTOM/git-super-status.sh
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # virtual environment info
 
 virtualenv_info() {
-    [ $VIRTUAL_ENV ] && echo '('$fg[blue]`basename $VIRTUAL_ENV`%{$reset_color%}') '
+    [ $VIRTUAL_ENV ] && echo '('$fg[blue]`basename $VIRTUAL_ENV`$PRRST') '
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -413,8 +412,8 @@ fi
 XUSER_DEFAULT="$(tput bold)$(tput setaf 3)"
 XUSER="${XUSERCOLOR:-$XUSER_DEFAULT}"
 
-PROMPT=$'
-%{$purple%}$UNAME%{$reset_color%} on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}%{$reset_color%} at %{$turquoise%}%T%{$reset_color%} in %{$limegreen%}%~%{$reset_color%} $(git_super_status)$(virtualenv_info)%{$reset_color%}%{$XUSER%}$(extra_user_prompt)%{$reset_color%}
+PROMPT=$'$(git-super-status 1)
+%{$purple%}$UNAME$PRRST on %{$ZHOST_COLOR%}%{$PAD%}$ZSYSNAME%{$PAD%}$PRRST at %{$turquoise%}%T$PRRST in %{$limegreen%}%~$PRRST $(git-super-status-prompt)$(virtualenv_info)$PRRST%{$XUSER%}$(extra_user_prompt)$PRRST
 ${ZPTAIL-$ }'
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -428,4 +427,4 @@ ${ZPTAIL-$ }'
 # BB=$fg_bold[blue]
 # RESET=$reset_color
 
-export RPS1="%(?..%{$fg_bold[yellow]%}%? ↵%{$reset_color%})"
+export RPS1="%(?..%{$fg_bold[yellow]%}%? ↵$PRRST)"
