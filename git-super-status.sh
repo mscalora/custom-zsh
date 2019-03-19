@@ -124,7 +124,7 @@ git-super-status-prompt() {
         if [ "$clean" -eq "1" ]; then
             STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_CLEAN%{${reset_color}%}"
         fi
-        echo "%{${reset_color}%}$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX%{${reset_color}%} $GIT_STATUS_SHOWN $GIT_REPO_SLUG"
+        echo "%{${reset_color}%}$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX%{${reset_color}%}"
 
     fi
 }
