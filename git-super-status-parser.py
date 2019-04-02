@@ -182,9 +182,9 @@ def rebase_progress(rebase_dir):
         - "1/4": Rebase in progress, commit 1 of 4
     """
     try:
-        with open(os.path.join(rebase_dir, 'next')) as next_file,\
-                open(os.path.join(rebase_dir, 'last')) as last_file:
-            rebase = next_file.read().strip() + '/' + last_file.read().strip()
+        with open(os.path.join(rebase_dir, 'next')) as next_file:
+            with open(os.path.join(rebase_dir, 'last')) as last_file:
+                rebase = next_file.read().strip() + '/' + last_file.read().strip()
     except IOError:
         rebase = '0'
 
@@ -242,6 +242,9 @@ def main():
     try:
         sys.stdout.write(current_git_status(lines))
         sys.stdout.flush()
+    except OSError:  # pragma: no cover
+        # this can happen if cwd is deleted
+        pass
     except IOError:  # pragma: no cover
         pass
 
