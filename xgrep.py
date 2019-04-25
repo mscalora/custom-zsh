@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 from __future__ import with_statement, print_function
 
@@ -101,14 +101,15 @@ defaults = {
 }
 
 
-from collections import ChainMap
-
-
 def error(s):
   sys.stderr.write(s)
 
 def merge_dicts (high_priority, low_priority):
-  return dict(ChainMap({}, high_priority, low_priority))
+  merged_dict = {}
+  for src in [low_priority, high_priority]:
+    for name, value in src.items():
+      merged_dict[name] = value
+  return merged_dict
 
 def read_config(options):
   config = {}
@@ -166,7 +167,7 @@ def shell_quote(s):
     return '"\'"'
   else:  # if s[0] == "'" or s[-1] == "'":
     match = re.match(r'(\'*)(.*?)(\'*)$', s)
-    return "\\'" * len(match[1]) + str_shell_quote(match[2]) + "\\'" * len(match[3])
+    return "\\'" * len(match.group(1)) + str_shell_quote(match.group(2)) + "\\'" * len(match.group(3))
 
 
 def main():
@@ -258,7 +259,7 @@ def main():
 
   if len(args) == 0:
     sys.stderr.write('ERROR: Missing string to search\n')
-    sys.stdout.write('exit 1')
+    sys.stdout.write('')
     sys.exit()
 
   if '(' in args or 'AND' in args or 'OR' in args or 'NOT' in args or ')' in args:
