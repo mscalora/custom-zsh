@@ -350,6 +350,13 @@ PRRST="$FX[reset]"
 source $ZSH_CUSTOM/git-super-status.sh
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# mike's special extras
+
+if [[ "$HOME" =~ 'mscalora|app' || ! -z "$ZSH_CUSTOM_EXTRAS" ]] ; then
+  source $ZSH_CUSTOM/extras.sh
+fi
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # virtual environment info
 
 virtualenv_info() {
