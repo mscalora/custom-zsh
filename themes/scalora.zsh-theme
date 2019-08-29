@@ -184,11 +184,60 @@ send-to-history() {
 }
 
 zle -N send-to-history
-bindkey '˙' send-to-history
+bindkey '˙' send-to-history # options-h
 
 autoload -Uz zle-delete-last-parameter
 zle -N zle-delete-last-parameter
-bindkey '∑' zle-delete-last-parameter
+bindkey '∑' zle-delete-last-parameter  # option w
+
+insert-date() {
+  LBUFFER="$LBUFFER$(date '+%Y-%m-%d')"
+}
+
+insert-date-time() {
+  LBUFFER="$LBUFFER$(date '+%Y-%m-%d-%H:%M:%S')"
+}
+
+zle -N insert-date
+zle -N insert-date-time
+bindkey '∂' insert-date # options-d
+bindkey 'Î' insert-date # options-shift-d
+
+keys() {
+  local KG="$(tput sgr0)$(tput setaf 2)"
+  local KBG="$(tput sgr0)$(tput bold)$(tput setaf 2)"
+  local KC="$(tput sgr0)$(tput setaf 6)"
+  local KR="$(tput sgr0)"
+  echo ""
+  echo "$KG===== THEME SHORTCUTS ====="
+  echo ""
+  echo "$KBG       OPTION-a -$KC asolute-path - toggle path between absolute and relative, expands ~, etc"
+  echo "$KR"
+  echo "$KBG       OPTION-h -$KC Send command line to history and clear"
+  echo "$KR"
+  echo "$KBG       OPTION-l -$KC toggle the case of the current word"
+  echo "$KBG SHIFT-OPTION-l -$KC toggle the case of the whole command line"
+  echo "$KR"
+  echo "$KBG       OPTION-q -$KC quote the current word or toggle the quote type if already quoted"
+  echo "$KBG SHIFT-OPTION-Q -$KC toggle all of the existing quotes on the command line"
+  echo "$KR"
+  echo "$KBG       OPTION-w -$KC remove the last parameter on the command line"
+  echo "$KR"
+  echo "$KBG       OPTION-d -$KC insert the date YYYY-MM-DD into the command line at the cursor"
+  echo "$KBG SHIFT-OPTION-D -$KC insert the date YYYY-mm-dd-HH:MM:SS into the command line at the cursor"
+  echo "$KR"
+  echo "$KBG       OPTION-z -$KC undo the last command line change (try '!!' tab, then OPTION-z)"
+  echo "$KBG SHIFT-OPTION-Z -$KC redo the last command line change"
+  echo "$KR"
+  echo "$KG===== ZSH SHORTCUTS REMINDER ====="
+  echo ""
+  echo "$KBG         CTRL-q -$KC \"kill line\" clear the command line, (NOTE †: OPTION-z to undo!)"
+  echo "$KBG         CTRL-w -$KC \"kill word\" delete the word to the left †"
+  echo "$KBG         CTRL-k -$KC \"kill right\" clear the command line right of the cursor †"
+  echo "$KBG         CTRL-u -$KC \"kill left\" clear the command line left of the cursor †"
+  echo "$KBG    OPTION-LEFT -$KC move left one word"
+  echo "$KBG   OPTION-RIGHT -$KC move right one word"
+ }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # smart alias type functions
