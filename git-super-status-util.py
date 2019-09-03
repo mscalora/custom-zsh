@@ -11,7 +11,11 @@ elif len(sys.argv) > 5 and sys.argv[1] == 'diff':
   begin_mark = sys.argv[4]
   end_mark = sys.argv[5]
 
-  before_lines = {line.split(':',1)[0]:line for line in before}
+  # [won't work in 2.6] before_lines = {line.split(':',1)[0]:line for line in before}
+  before_lines = {}
+  for line in before:
+    before_lines[line.split(':',1)[0]] = line
+
   keep_diffing = True
   for i, line in enumerate(after):
     key, value = line.split(':', 1) if ':' in line else (line, ' ')
