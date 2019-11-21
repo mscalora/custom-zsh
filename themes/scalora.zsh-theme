@@ -24,9 +24,17 @@ FPATH=$ZSH_CUSTOM/functions:$FPATH
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # theme aliases
 
-ts() {
+timestamp () {
   date +"%Y-%m-%dT%H:%M:%S"
 }
+timestampn () {
+  echo -n $(date +"%Y-%m-%dT%H:%M:%S")
+}
+ts () {
+  timestamp
+}
+zle -N timestampn
+bindkey "ˇ" timestampn    # OPTION-SHIT-t
 
 tss() {
   python -c "import datetime ; print datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]"
