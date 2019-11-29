@@ -187,11 +187,14 @@ git-super-status() {
 
 alias super-git-status=git-super-status
 
+if which python >/dev/null ; then local py=python ; else local py=python3 ; fi
+
 # Always has path to this directory
 # A: finds the absolute path, even if this is symlinked
 # h: equivalent to dirname
+
 export __GIT_PROMPT_DIR="${0:A:h}"
-export __GIT_STATUS_PY_BIN="${ZSH_GIT_PROMPT_PYBIN:-"python"}"
+export __GIT_STATUS_PY_BIN="${ZSH_GIT_PROMPT_PYBIN:-$py}"
 export __GIT_STATUS_UTIL="$__GIT_PROMPT_DIR/git-super-status-util.py"
 export __GIT_STATUS_PARSER="$__GIT_PROMPT_DIR/git-super-status-parser.py"
 

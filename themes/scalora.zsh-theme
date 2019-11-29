@@ -37,7 +37,8 @@ zle -N timestampn
 bindkey "ˇ" timestampn    # OPTION-SHIT-t
 
 tss() {
-  python -c "import datetime ; print datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]"
+  if which python >/dev/null ; then local py=python ; else local py=python3 ; fi
+  "$py" -c "import datetime ; print datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]"
 }
 
 hist() {
