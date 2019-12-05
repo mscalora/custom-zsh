@@ -114,7 +114,8 @@ fi
 autoload -Uz modify-current-argument
 
 toggle-path-py() {
-  REPLY="$(python - $1 <<EOF
+  if which python >/dev/null ; then local py=python ; else local py=python3 ; fi
+  REPLY="$("$py" - $1 <<EOF
 "Toggle between relative and absolute path, surrounding quotes or initial quote"
 import os, sys
 a = sys.argv[1]
