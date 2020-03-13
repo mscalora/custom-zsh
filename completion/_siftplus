@@ -1,0 +1,18 @@
+#compdef siftplus sift
+
+local help="$(siftplus --help | sed -e $'s/\x1b\[[(0-9;]*[mGKFB]//g')"
+# no param with short arg
+local args1="$(echo -n "$help" | command sift --no-conf -N --replace '{$2,$1}"[$3]"' -- '^\s*(-\S),\s*(--[^ =]+)\s+(.*)')"
+# no param without short arg
+local args2="$(echo -n "$help" | command sift --no-conf -N --replace '$1"[$2]"' -- '^\s*(--[^ =]+)\s+(.*)')"
+# has param with short arg
+local args3="$(echo -n "$help" | command sift --no-conf -N --replace '{$2,$1}"[$4]:$3:( )"' -- '^\s*(-\S),\s*(--[^ =]+)=([^\s\|]+(?:\|\S*)?)\s+(.*)')"
+# has param without short arg
+local args4="$(echo -n "$help" | command sift --no-conf -N --replace '$1"[$3]:$2:( )"' -- '^\s*(--[^ =]+)=([^\s\|]+(?:\|\S*)?)\s+(.*)')"
+
+# fix file args
+local argsA="$(echo -e "$args1\n$args2\n$args3\n$args4\n\"*:_files\"" | command sift --no-conf -N --replace ':FILE:_files' -- ':FILE:\( \)')"
+# others
+local argsB="$(echo -e "$args1\n$args2\n$args3\n$args4\n\"*:_files\"" | command sift --no-conf -N -v -- ':FILE:\( \)')"
+
+eval _arguments ${(f)argsA} ${(f)argsB}

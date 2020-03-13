@@ -45,15 +45,16 @@ hist() {
   CI=""
   if [[ "$1" == "--help" || "$1" == "-h" || "$1" == "-?" ]] ; then
     echo "Usage:"
-    echo "    $0 [ -i ] <number>       - show last <number> items"
-    echo "    $0 [ -i ] <regexp>       - search history for <regexp>"
-    echo "    $0 [ -i ] <regexp> <number>  - show last <number> items that match <regexp>"
-    echo "    $0 [ -i ] <number> <regexp>  - search last <number> items for <regexp>"
-    echo "    $0 [ -i ] <regexp1> <regexp2>  - search history for <regexp1> AND <regexp2>"
-    echo "    $0 <number1> <number2>     - show <number2> items starting at <number1>"
+    echo "    $0 [ <options> ] [--] <number>       - show last <number> items"
+    echo "    $0 [ <options> ] [--] <regexp>       - search history for <regexp>"
+    echo "    $0 [ <options> ] [--] <regexp> <number>  - show last <number> items that match <regexp>"
+    echo "    $0 [ <options> ] [--] <number> <regexp>  - search last <number> items for <regexp>"
+    echo "    $0 [ <options> ] [--] <regexp1> <regexp2>  - search history for <regexp1> AND <regexp2>"
+    echo "    $0 [--] <number1> <number2>     - show <number2> items starting at <number1>"
     echo ""
     echo "  Options:"
     echo "    -i         - use case insensitive search for regexp"
+    echo "    -F         - use fixed string search, not regexp"
     echo "    --help -h or -?  - show this help"
     echo ""
   elif [[ "$1" == "-e" || "$1" == "--edit" ]] ; then
@@ -68,10 +69,21 @@ hist() {
     nano +999999 ~/.zsh_history
     fc -R
   else
-    if [[ "$1" == "-i" ]] then
-      CI="-i"
-      shift
-    fi
+    OPTS="-E"
+    while [[ "$1" =~ ^- ]] ; do
+      if [[ "$1" == "-i" ]] ; then # case insensetive
+        OPTS="$OPTS -i"
+        shift
+      elif [[ "$1" == "-F" ]] ; then # fixed strings
+        OPTS="$OPTS -F"
+        shift
+      elif [[ "$1" == "-" || "$1" == "--" ]] ; then
+        shift
+        break
+      else
+        break
+      fi
+    done
     if [[ "$1" == "" ]] ; then
       echo "Last 50 history items"
       history | tail -n 50
@@ -84,18 +96,18 @@ hist() {
         history | head -n $(( $1 + $2 )) | tail -n $2
       else
         echo "Last $1 history items that also match $2"
-        history | tail -n $1 | egrep $CI $2
+        history | tail -n $1 | egrep $OPTS -e $2
       fi
     else
       if [[ "$2" == "" ]] ; then
         echo "History items that match $1"
-        history | egrep $CI $1
+        history | egrep $OPTS -e $1
       elif [[ "$2" =~ ^[0-9]+$ ]] ; then
         echo "Last $2 matches of $1 in history"
-        history | egrep $CI $1 | tail -n $2
+        history | egrep $OPTS -e $1 | tail -n $2
       else
         echo "History items that match $1 and $2"
-        history | egrep $CI $1 | egrep $CI $2
+        history | egrep $OPTS -e $1 | egrep $OPTS -e $2
       fi
     fi
   fi
@@ -303,6 +315,12 @@ autoload ssh-clear
 autoload dur
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# load utils
+
+source $ZSH_CUSTOM/rg-utils.sh
+source $ZSH_CUSTOM/sift-utils.sh
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # command options
 
 # syntax coloring if gnu 
@@ -326,11 +344,16 @@ bindkey "^[[:r" redo
 bindkey "¸" redo
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# for extra completions, any .inc file in plugins is included
+# for extra scripts, any .inc or _ prefixed file in plugins is included
 
-for inc in $ZSH_CUSTOM/plugins/*.inc(.N) ; do
+for inc in $(find $ZSH_CUSTOM/plugins -name '*.inc' -or -name '_*') ; do
   source $inc
 done
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# theme completions
+
+fpath=($ZSH_CUSTOM/completion $fpath)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # self-update
