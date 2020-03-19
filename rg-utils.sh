@@ -1,11 +1,23 @@
 if type rg >/dev/null ; then
 
-  if ! type search_all_up >/dev/null ; then
-    source $ZSH_CUSTOM/utils.sh
-  fi
+  _rg_search_all_up() {
+    # extended from https://stackoverflow.com/a/19011599/370746
+    local look=${PWD%/}
+    while [[ -n $look ]]; do
+        for name ; do
+          [[ -e $look/$name ]] && {
+              printf '%s\n' "$look/$name"
+              return
+          }
+        done
+        look=${look%/*}
+    done
+    [[ -e /$1 ]] && echo /
+  }
 
-  if ! type rg_local >/dev/null ; then
-    if which rg >/dev/null ; then
+
+  if ! type rgplus >/dev/null ; then
+    if type rg >/dev/null ; then
 
       rgplus () {
         FOUND="$(search_all_up .ripgreprc search_up .rgrc search_up ripgrep.config || echo $HOME/.ripgreprc)"
@@ -27,8 +39,10 @@ if type rg >/dev/null ; then
       alias xg=rgplus
       alias xgrep=rgplus
 
-      if which compdefd >/dev/null ; then
-        compdef _rg rgplus=rg
+      if type compdef >/dev/null ; then
+        compdef xg=rg
+        compdef xgrep=rg
+        compdef rgplus=rg
       fi
 
     fi

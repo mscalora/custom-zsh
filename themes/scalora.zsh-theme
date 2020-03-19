@@ -344,13 +344,6 @@ bindkey "^[[:r" redo
 bindkey "¸" redo
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# for extra scripts, any .inc or _ prefixed file in plugins is included
-
-for inc in $(find $ZSH_CUSTOM/plugins -name '*.inc' -or -name '_*') ; do
-  source $inc
-done
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # theme completions
 
 fpath=($ZSH_CUSTOM/completion $fpath)
