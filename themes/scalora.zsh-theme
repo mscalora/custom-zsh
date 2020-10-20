@@ -25,10 +25,12 @@ FPATH=$ZSH_CUSTOM/functions:$FPATH
 # theme aliases
 
 timestamp () {
+  emulate -L zsh
   date +"%Y-%m-%dT%H:%M:%S"
 }
 timestampn () {
-  echo -n $(date +"%Y-%m-%dT%H:%M:%S")
+  emulate -L zsh
+  LBUFFER="$LBUFFER$(date +"%Y-%m-%dT%H:%M:%S")"
 }
 ts () {
   timestamp
@@ -213,17 +215,19 @@ zle -N zle-delete-last-parameter
 bindkey '∑' zle-delete-last-parameter  # option w
 
 insert-date() {
-  LBUFFER="$LBUFFER$(date '+%Y-%m-%d')"
+  emulate -L zsh
+  LBUFFER="${LBUFFER}$(date '+%Y-%m-%d')"
 }
 
 insert-date-time() {
-  LBUFFER="$LBUFFER$(date '+%Y-%m-%d-%H:%M:%S')"
+  emulate -L zsh
+  LBUFFER="${LBUFFER}$(date '+%Y-%m-%d-%H:%M:%S')"
 }
 
 zle -N insert-date
 zle -N insert-date-time
 bindkey '∂' insert-date # options-d
-bindkey 'Î' insert-date # options-shift-d
+bindkey 'Î' insert-date-time # options-shift-d
 
 keys() {
   local KG="$(tput sgr0)$(tput setaf 2)"
