@@ -1,4 +1,4 @@
-  cat >>~/.nanorc <<"EOF"
+  cat >>~/.nanorc <<-EOF
 # AUTO CREATED NANORC FILE
 set autoindent
 set constantshow
