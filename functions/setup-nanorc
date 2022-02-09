@@ -1,6 +1,5 @@
   cat >>~/.nanorc <<"EOF"
 # AUTO CREATED NANORC FILE
-set quiet
 set autoindent
 set constantshow
 set positionlog
