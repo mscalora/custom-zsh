@@ -202,6 +202,8 @@ def current_git_status(lines):
         IOError: There is no `.git` folder in the current folder hierarchy
     """
     git_root = find_git_root()
+    if not os.access(git_root, os.X_OK):
+      return '.git not readable'
     head_file, stash_file, merge_file, rebase_dir = git_paths(git_root)
     branch, upstream, local = parse_branch(lines[0], head_file)
     remote = parse_ahead_behind(lines[0])
