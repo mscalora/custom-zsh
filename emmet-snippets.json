@@ -1,0 +1,15 @@
+{
+  "html": {
+    "abbreviations": {
+      "mmm": "mike@scalora.org",
+      "btn:b": "button[type=\"button\"]"
+    },
+    "snippets": {
+      "button:button": "<button type=\"button\">$0</button>"
+    }
+  },
+  "css": {
+    "snippets": {
+    }
+  }
+}

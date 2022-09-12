@@ -372,14 +372,27 @@ upgrade_custom() {
   else
     printf '\033[0;31m%s\033[0m\n' 'There was an error updating. Try again later? You can trigger an update with: upgrade_custom'
   fi
+  upgrade_ped_tool
   popd >/dev/null
 }
 
-upgrade_custom_update() {
+ped () {
+  if ! [[ -f "$ZSH_CUSTOM/ped" ]] ; then
+    upgrade_ped_tool
+  fi
+  "$ZSH_CUSTOM/ped" "${@}"
+}
+
+local upgrade_ped_tool () {
+  curl --silent "https://raw.githubusercontent.com/mscalora/ped-tool/master/ped.py" -o "$ZSH_CUSTOM/ped"
+  chmod +x "$ZSH_CUSTOM/ped"
+}
+
+local upgrade_custom_update() {
   echo -n "$1" >! $ts_file
 }
 
-upgrade_custom_check() {
+local upgrade_custom_check() {
   local ts
   local prev='missing-ts'
   if [[ -f $ZSH/.git/FETCH_HEAD ]] ; then
