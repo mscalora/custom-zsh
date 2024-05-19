@@ -6,7 +6,7 @@ set positionlog
 set tabsize 4
 set tabstospaces
 set nowrap
-set suspend
+#set suspend
 set titlecolor brightyellow,blue
 set statuscolor brightyellow,blue
 bind ^S savefile main
