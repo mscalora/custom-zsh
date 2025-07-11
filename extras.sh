@@ -19,3 +19,18 @@ else
     netstat -ltn | egrep ".*:${1:-80}.*|$" --color || echo "$(tput setaf 1)no one$(tput sgr0)"
   }
 fi
+
+# Function to live tail Apache logs with excluded terms
+livetailx() {
+    # Check if at least one exclude term is provided
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: livetailx <exclude_term1> [exclude_term2 ...]"
+        return 1
+    fi
+
+    # Escape dots in exclude terms and join with regex OR (|)
+    local exclude_pattern=$(echo "$@" | sed 's/\./\\./g' | tr ' ' '|')
+
+    # Tail all .log files, excluding lines matching the pattern
+    tail -f /var/log/apache2/*.log | grep -v -E "$exclude_pattern"
+}
