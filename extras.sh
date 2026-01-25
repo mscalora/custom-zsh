@@ -19,3 +19,15 @@ else
     netstat -ltn | egrep ".*:${1:-80}.*|$" --color || echo "$(tput setaf 1)no one$(tput sgr0)"
   }
 fi
+
+json-extract () {
+  if [[ "$1" == "" || "$1" == "-h" || "$1" == "-?" || "$1" == "--help" ]] ; then
+    echo 'Extract top level property value from json document'
+    echo '  Usage: json-extract <property> [ <file-path> ]'
+    echo '  Example 1: json-extract status /tmp/response.json'
+    echo '  Example 2: echo $JSON_STRING | json-extract status'
+    echo '  Status codes: 0 - success, 1 - json parse error, 2 - property missing'
+  else
+    python3 -c $'import sys, json;\ntry: obj = json.load(open(sys.argv[2])); \nexcept: sys.exit(1)\ntry: v=obj[sys.argv[1]]; print(json.dumps(v) if  isinstance(v, dict) else v)\nexcept: sys.exit(2)' "$1" "${2:-/dev/stdin}"
+  fi
+}

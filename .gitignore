@@ -3,3 +3,5 @@ example.zsh
 .idea
 .vscode
 ped
+.DS_Store
+functions/.DS_Store
