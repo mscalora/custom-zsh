@@ -46,3 +46,7 @@ json-extract () {
     python3 -c $'import sys, json;\ntry: obj = json.load(open(sys.argv[2])); \nexcept: sys.exit(1)\ntry: v=obj[sys.argv[1]]; print(json.dumps(v) if  isinstance(v, dict) else v)\nexcept: sys.exit(2)' "$1" "${2:-/dev/stdin}"
   fi
 }
+
+autoload -Uz copy-earlier-word                                                                                                                                                                                  130 ↵
+zle -N copy-earlier-word
+bindkey '^[,' copy-earlier-word
