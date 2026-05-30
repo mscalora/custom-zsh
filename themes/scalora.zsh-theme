@@ -352,6 +352,8 @@ bindkey "¸" redo
 
 fpath=($ZSH_CUSTOM/completion $fpath)
 
+source $ZSH_CUSTOM/comp-utils.sh
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # self-update
 
