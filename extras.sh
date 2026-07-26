@@ -18,6 +18,18 @@ else
   who-is-listening () {
     netstat -ltn | egrep ".*:${1:-80}.*|$" --color || echo "$(tput setaf 1)no one$(tput sgr0)"
   }
+
+  # ====== This Allows ssh sessions on linux to pbcopy to client's host Mac clipboard ======
+  pbcopy() {
+    local input
+    # Read stdin or text input
+    input=$(cat)
+    # Encode in base64 and wrap in the OSC 52 sequence
+    printf "\033]52;c;%s\a" "$(printf '%s' "$input" | base64 | tr -d '\r\n')"
+  }
+
+  find /var/www -name _mcp_meta.ini 2> >(grep -v "Permission denied" >&2)
+
 fi
 
 # Function to live tail Apache logs with excluded terms
