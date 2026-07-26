@@ -9,6 +9,10 @@ import os
 import subprocess as sub
 import sys
 try:
+    import pwd
+except ImportError:  # pragma: no cover
+    pwd = None
+try:
     import urllib.request as urllib
 except:
     import urllib
@@ -36,6 +40,81 @@ def find_git_root():
         working_d = os.path.dirname(working_d)
 
     raise IOError("No git dir in folder hierarchy.")
+
+
+def path_owner_uid(path):
+    """Return st_uid for path, or None if it cannot be stat'd."""
+    try:
+        return os.stat(path).st_uid
+    except OSError:
+        return None
+
+
+def owner_name(uid):
+    """Best-effort username for a uid."""
+    if uid is None:
+        return 'unknown'
+    if pwd is not None:
+        try:
+            return pwd.getpwuid(uid).pw_name
+        except KeyError:
+            pass
+    return str(uid)
+
+
+def foreign_repo_info(git_root):
+    """
+    Detect when the current user does not own the repo.
+
+    Git refuses "dubious ownership" in this situation (common when root
+    enters another user's checkout). We still want status, plus a warning.
+
+    Returns: (is_foreign, owner_label)
+        is_foreign: 1 if cwd user should not modify this repo, else 0
+        owner_label: username/uid of the repo owner, or '-' if owned by us
+    """
+    workdir = os.path.dirname(os.path.abspath(git_root))
+    uid = path_owner_uid(git_root)
+    if uid is None:
+        uid = path_owner_uid(workdir)
+    if uid is None:
+        return 0, '-'
+    if uid == os.geteuid():
+        return 0, '-'
+    return 1, owner_name(uid)
+
+
+def safe_dirs_for(git_root, workdir=None):
+    """Paths to pass as temporary git safe.directory overrides."""
+    git_root = os.path.abspath(git_root)
+    if workdir is None:
+        workdir = os.path.dirname(git_root)
+    else:
+        workdir = os.path.abspath(workdir)
+    # Deduplicate while preserving order
+    dirs = []
+    for path in (workdir, git_root):
+        if path not in dirs:
+            dirs.append(path)
+    return dirs
+
+
+def run_git_status(safe_dirs=None):
+    """
+    Run `git status --branch --porcelain`, optionally marking dirs safe.
+
+    Returns: (lines, err_text)
+    """
+    cmd = ['git']
+    if safe_dirs:
+        for directory in safe_dirs:
+            cmd.extend(['-c', 'safe.directory=' + directory])
+    cmd.extend(['status', '--branch', '--porcelain'])
+    proc = sub.Popen(cmd, stdout=sub.PIPE, stderr=sub.PIPE)
+    out, err = proc.communicate()
+    err = err.decode('utf-8', errors='ignore').strip()
+    lines = out.decode('utf-8', errors='ignore').splitlines()
+    return lines, err
 
 
 # Example contents of worktree `.git` file, worktree is w1
@@ -191,7 +270,7 @@ def rebase_progress(rebase_dir):
     return rebase
 
 
-def current_git_status(lines):
+def current_git_status(lines, foreign=0, foreign_owner='-'):
     """
     Parse git status procelain output and return the formatted text that
     represents the current status of the respoistory.
@@ -200,10 +279,13 @@ def current_git_status(lines):
 
     Raises:
         IOError: There is no `.git` folder in the current folder hierarchy
+        ValueError: Porcelain output is missing the required branch line
     """
     git_root = find_git_root()
     if not os.access(git_root, os.X_OK):
       return '.git not readable'
+    if not lines:
+        raise ValueError('No git status output to parse')
     head_file, stash_file, merge_file, rebase_dir = git_paths(git_root)
     branch, upstream, local = parse_branch(lines[0], head_file)
     remote = parse_ahead_behind(lines[0])
@@ -214,7 +296,8 @@ def current_git_status(lines):
     slug = urllib.quote(git_root)
 
     values = [str(x) for x in (branch,) + remote + stats +
-              (stashes, local, upstream, merge, rebase, slug)]
+              (stashes, local, upstream, merge, rebase, slug,
+               foreign, foreign_owner)]
 
     return ' '.join(values)
 
@@ -226,28 +309,66 @@ def main():
 
         2) `git status --branch --porcelain | ./git-super-status-parser.py`
             Will read stdin and parse it.
+
+    If the repo is owned by another user (e.g. root in mscalora's checkout),
+    git may refuse the repo as "dubious ownership". In that case we re-run
+    status with a temporary safe.directory override so the prompt still
+    works, and flag the repo as foreign-owned.
     """
-
-    if not sys.stdin.isatty():
-        lines = [line.rstrip() for line in sys.stdin.readlines()]
-        err = u'\n'.join(lines)
-    else:
-        proc = sub.Popen(['git', 'status', '--branch', '--porcelain'],
-                         stdout=sub.PIPE, stderr=sub.PIPE)
-        out, err = proc.communicate()
-        err = err.decode('utf-8', errors='ignore').strip()
-        lines = out.decode('utf-8', errors='ignore').splitlines()
-
-    if err.lower().startswith('fatal: not a git repository'):
+    try:
+        git_root = find_git_root()
+    except IOError:
         return
 
+    foreign, foreign_owner = foreign_repo_info(git_root)
+    workdir = os.path.dirname(os.path.abspath(git_root))
+    safe_dirs = safe_dirs_for(git_root, workdir) if foreign else None
+
+    lines = []
+    err = u''
+    piped_input = False
+    if not sys.stdin.isatty():
+        raw_lines = [line.rstrip() for line in sys.stdin.readlines()]
+        # Empty stdin (e.g. `</dev/null` from the shell hook) means "run git
+        # yourself", not "status failed".
+        if raw_lines:
+            piped_input = True
+            fatal_lines = [line for line in raw_lines
+                           if line.lower().startswith('fatal:')]
+            lines = [line for line in raw_lines
+                     if not line.lower().startswith('fatal:')]
+            if fatal_lines:
+                err = u'\n'.join(fatal_lines)
+
+    if not piped_input:
+        lines, err = run_git_status(safe_dirs)
+
+    err_l = err.lower()
+    if err_l.startswith('fatal: not a git repository'):
+        return
+
+    # Ownership blocked git (empty status and/or dubious ownership message).
+    # Retry with a temporary safe.directory override so the prompt still works.
+    needs_retry = (not lines) or ('dubious ownership' in err_l)
+    if needs_retry:
+        lines, err = run_git_status(safe_dirs or safe_dirs_for(git_root, workdir))
+        err_l = err.lower()
+        if err_l.startswith('fatal: not a git repository'):
+            return
+        if not lines:
+            return
+        # Git only accepted the repo after override => treat as foreign.
+        if foreign == 0:
+            foreign = 1
+            if foreign_owner == '-':
+                foreign_owner = owner_name(path_owner_uid(git_root))
+
     try:
-        sys.stdout.write(current_git_status(lines))
+        sys.stdout.write(current_git_status(lines, foreign=foreign,
+                                            foreign_owner=foreign_owner))
         sys.stdout.flush()
-    except OSError:  # pragma: no cover
-        # this can happen if cwd is deleted
-        pass
-    except IOError:  # pragma: no cover
+    except (OSError, IOError, ValueError, IndexError):  # pragma: no cover
+        # cwd deleted, unreadable git metadata, or unexpected porcelain
         pass
 
 

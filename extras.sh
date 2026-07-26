@@ -28,8 +28,6 @@ else
     printf "\033]52;c;%s\a" "$(printf '%s' "$input" | base64 | tr -d '\r\n')"
   }
 
-  find /var/www -name _mcp_meta.ini 2> >(grep -v "Permission denied" >&2)
-
 fi
 
 # Function to live tail Apache logs with excluded terms

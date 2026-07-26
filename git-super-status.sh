@@ -42,7 +42,10 @@ preexec-git-super-status() {
 
 git-super-status-update-vars() {
   unset __CURRENT_GIT_STATUS
-  __GIT_CMD=$(git status --porcelain --branch &> /dev/null 2>&1 | ZSH_THEME_GIT_PROMPT_HASH_PREFIX=$ZSH_THEME_GIT_PROMPT_HASH_PREFIX "$__GIT_STATUS_PY_BIN" "$__GIT_STATUS_PARSER")
+  # Let the parser run git itself. Piping `git status` here used to discard
+  # "dubious ownership" failures (common as root in another user's repo) and
+  # crash the prompt on empty input.
+  __GIT_CMD=$(ZSH_THEME_GIT_PROMPT_HASH_PREFIX=$ZSH_THEME_GIT_PROMPT_HASH_PREFIX "$__GIT_STATUS_PY_BIN" "$__GIT_STATUS_PARSER" </dev/null)
   __CURRENT_GIT_STATUS=("${(@s: :)__GIT_CMD}")
   unset __GIT_CMD
 
@@ -59,6 +62,8 @@ git-super-status-update-vars() {
   GIT_MERGING=$__CURRENT_GIT_STATUS[11]
   GIT_REBASE=$__CURRENT_GIT_STATUS[12]
   GIT_REPO_SLUG=$__CURRENT_GIT_STATUS[13]
+  GIT_FOREIGN=${__CURRENT_GIT_STATUS[14]:-0}
+  GIT_FOREIGN_OWNER=${__CURRENT_GIT_STATUS[15]:--}
 
   if [[ -n "$GIT_REPO_SLUG" ]] ; then
     GIT_REPO_ROOT="$(dirname "$(url-decode "$GIT_REPO_SLUG")")"
@@ -124,7 +129,12 @@ git-super-status-prompt() {
         if [ "$clean" -eq "1" ]; then
             STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_CLEAN%{${reset_color}%}"
         fi
-        echo "%{${reset_color}%}$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX%{${reset_color}%}"
+        STATUS="%{${reset_color}%}$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX%{${reset_color}%}"
+        if [ "${GIT_FOREIGN:-0}" -ne "0" ]; then
+            local owner_label="${GIT_FOREIGN_OWNER:--}"
+            STATUS="$STATUS $ZSH_THEME_GIT_PROMPT_FOREIGN_PREFIX${owner_label}$ZSH_THEME_GIT_PROMPT_FOREIGN_SUFFIX%{${reset_color}%}"
+        fi
+        echo "$STATUS"
 
     fi
 }
@@ -153,7 +163,11 @@ git-super-status() {
   if [[ -z "$1" || "$1" == "skip-zeros" ]] ; then
     if [ -n "$__CURRENT_GIT_STATUS" ] ; then
       gss-strip-prompt $' \nSuper Git Status: [git-super-status output]' 
-      gss-strip-prompt  "  Root: $GIT_REPO_ROOT"
+      gss-strip-prompt  "  Root dir: $GIT_REPO_ROOT"
+      if [ "${GIT_FOREIGN:-0}" -ne "0" ]; then
+          local owner_label="${GIT_FOREIGN_OWNER:--}"
+          gss-strip-prompt  "  Warning: $ZSH_THEME_GIT_PROMPT_FOREIGN_WARN owned by ${owner_label} — do not modify this git repo%{${reset_color}%}"
+      fi
       if [ "$GIT_LOCAL_ONLY" -ne "0" ]; then
           gss-strip-prompt  "  Branch: $ZSH_THEME_GIT_PROMPT_LOCAL%{${reset_color}%}"
       elif [ "$ZSH_GIT_PROMPT_SHOW_UPSTREAM" -gt "0" ] && [ -n "$GIT_UPSTREAM" ] && [ "$GIT_UPSTREAM" != ".." ]; then
@@ -228,6 +242,10 @@ ZSH_THEME_GIT_PROMPT_STASHED="%{$fg[white]%}%{s%G%}"
 ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg[cyan]%}%{…%G%}"
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg_bold[green]%}%{✔%G%}"
 ZSH_THEME_GIT_PROMPT_LOCAL=" L"
+# Shown when the repo is owned by another user (e.g. root in mscalora's tree)
+ZSH_THEME_GIT_PROMPT_FOREIGN_PREFIX="%{$bg[red]%}%{$fg_bold[yellow]%}[OWNED BY "
+ZSH_THEME_GIT_PROMPT_FOREIGN_SUFFIX="]%{${reset_color}%}"
+ZSH_THEME_GIT_PROMPT_FOREIGN_WARN="%{$bg[red]%}%{$fg_bold[yellow]%}FOREIGN REPO%{${reset_color}%}"
 # The remote branch will be shown between these two
 ZSH_THEME_GIT_PROMPT_UPSTREAM_FRONT=" {%{$fg[blue]%}"
 ZSH_THEME_GIT_PROMPT_UPSTREAM_END="%{${reset_color}%}}"
